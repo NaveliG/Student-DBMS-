@@ -1,0 +1,845 @@
+Skip to content
+ 
+@NaveliGholap
+
+Student-Database-Management
+PROBLEM DEFINITION: An institute wants to automate the process of Student Data Management. They need the following functionalities to be implemented.
+
+LaunchNewCourse
+ErollStduent
+ViewCourseDetails
+ViewStudentDetails.
+Module 1: LaunchNewCourse This module is useto Launch a new course. The course details for a new course must be saved in database and relevant details must be uploaded.
+
+Module 2: EnrollStudent This module is used to enroll student for a course. The user enters the Student details which must be saved in the database and relevant details must be updated.
+
+Module 3: ViewStudentDetails This module is used to display Student Details which are enrolled for a particular course by accepting the courseId.
+
+Module 4: ViewCourseDetails This module is used to display Course details by accepting courseId.
+
+Bean Classes: Create Enum CourseName with following constants: C, J2EE, JAVA, SPRING, HIBERNATE. Create class Course with following attributes : 1)courseId: integer, 2)courseName: courseName, 3)duration: integer, 4)fees:integer. Create class Student with following attributes: 1)regId:integer, 2)studentName:String, 3)address:String, 4)contactNumber: Long, 5)courseId:integer, 6)feesPaid:integer, 7)dateOfAdmission, 8)startDate, 9)endDate
+
+Service 1)launchCourse() 2)fetchAllCourseDetails() 3)fetchCourseDetails(courseId) 4)fetchStudentDetails(courseId)
+
+
+© 2020 GitHub, Inc.
+ 32  Course.java 
+@@ -0,0 +1,32 @@
+package com.student;
+
+public class Course {
+	private int courseId;
+	private CourseName courseName;
+	private int duration;
+	private int fees;
+	public int getCourseId() {
+		return courseId;
+	}
+	public void setCourseId(int courseId) {
+		this.courseId = courseId;
+	}
+	public CourseName getCourseName() {
+		return courseName;
+	}
+	public void setCourseName(CourseName courseName) {
+		this.courseName = courseName;
+	}
+	public int getDuration() {
+		return duration;
+	}
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+	public int getFees() {
+		return fees;
+	}
+	public void setFees(int fees) {
+		this.fees = fees;
+	}
+}
+ 37  CourseIdValidator.java 
+@@ -0,0 +1,37 @@
+package com.student;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class CourseIdValidator {
+	DbConnect db=new DbConnect();
+    Connection con=null;
+
+    Statement smt=null;
+    Boolean status=false;
+    public boolean validate(int courseId)
+   {
+    try {
+    	 con=db.connect();
+         String query="SELECT * from course where courseid='"+courseId+"'";
+         smt=con.createStatement();
+         ResultSet rs=smt.executeQuery(query);
+         if(rs.next())
+         {
+        	 status=true;
+         }
+         else
+        	 System.out.println("Enter Valid Course Id");
+    }
+
+    catch(SQLException e)
+    {
+    	String s="Please enter valid course Id";
+    	System.out.println(s);
+    }
+    return status;
+ }	
+}
+
+ 5  CourseName.java 
+@@ -0,0 +1,5 @@
+package com.student;
+
+public enum CourseName {
+	C,JAVA,J2EE,SPRING,HIBERNATE;
+}
+ 46  DbConnect.java 
+@@ -0,0 +1,46 @@
+package com.student;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class DbConnect {
+	public Connection connect()
+	{
+
+		Connection con=null;
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			//System.out.println("DRIVER LOADED");
+			String url="jdbc:oracle:thin:@localhost:1521:orcl";
+			String username="hr";
+			String password="hr";
+		    con=DriverManager.getConnection(url, username, password);
+		        if(con==null)
+		        {
+		    	System.out.println("CONNECTION CANNOT BE ESTABLISHED");
+		        }
+		       // System.out.println("CONNECTION ESTABLISHED");
+		      } catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();//Exception details are printed by stackTrace in red color.
+		     } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		     }
+
+		/*finally
+		{
+		try {
+               if(con!=null)//properly established connection with database
+               con.close();
+		} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		}
+		System.out.println("End of Application");
+	   
+	   }*/
+		return con;
+  } 
+}
+ 88  Student.java 
+@@ -0,0 +1,88 @@
+package com.student;
+
+import java.util.Date;
+
+public class Student {
+	public int regId;
+	private String studentName;
+	private String address;
+    private long contactNumber;
+    private int courseId;
+    private int feesPaid;
+    private Date dateOfAdmission;
+    private Date startDate;
+    private Date endDate;
+	public int getRegId() {
+		return regId;
+	}
+	Student()
+	{
+
+	}
+	public Student(int regId, String studentName, String address, long contactNumber, int courseId, int feesPaid,
+			Date dateOfAdmission, Date startDate, Date endDate) {
+		super();
+		this.regId = regId;
+		this.studentName = studentName;
+		this.address = address;
+		this.contactNumber = contactNumber;
+		this.courseId = courseId;
+		this.feesPaid = feesPaid;
+		this.dateOfAdmission = dateOfAdmission;
+		this.startDate = startDate;
+		this.endDate = endDate;
+	}
+	public void setRegId(int regId) {
+		this.regId = regId;
+	}
+	public String getStudentName() {
+		return studentName;
+	}
+	public void setStudentName(String studentName) {
+		this.studentName = studentName;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public long getContactNumber() {
+		return contactNumber;
+	}
+	public void setContactNumber(long contactNumber) {
+		this.contactNumber = contactNumber;
+	}
+	public int getCourseId() {
+		return courseId;
+	}
+	public void setCourseId(int courseId) {
+		this.courseId = courseId;
+	}
+	public int getFeesPaid() {
+		return feesPaid;
+	}
+	public void setFeesPaid(int feesPaid) {
+		this.feesPaid = feesPaid;
+	}
+	public Date getDateOfAdmission() {
+		return dateOfAdmission;
+	}
+	public void setDateOfAdmission(Date dateOfAdmission) {
+		this.dateOfAdmission = dateOfAdmission;
+	}
+	public Date getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+	public Date getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+
+}
+ 236  StudentCourseService.java 
+@@ -0,0 +1,236 @@
+package com.student;
+import java.util.*;
+import java.util.Date;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Scanner;
+
+public class StudentCourseService {
+	    DbConnect db=new DbConnect();
+	    Connection conn=db.connect();
+	    Statement smt=null;
+	    Date dateOfAdmission;
+	    Date startDate;
+	    Date endDate;
+
+	public void launchCourse()
+	{
+		 Scanner sc=new Scanner(System.in);
+		 String courseName;
+		 System.out.println("***ENTER THE COURSE DETAILS***");
+         System.out.println("**AVAILABLE COURSES \n 1.C \n 2.JAVA \n 3.J2EE \n 4.SPRING \n 5.HIBERNATE");
+         boolean status = false;
+         int count =1;
+         do {
+         System.out.println("\t ENTER COURSE NAME :");
+         courseName=sc.next();
+         CourseName[] course=CourseName.values();
+
+         for(CourseName c : course)
+	        {
+	        	String s=c.toString();
+	        	if(s.equalsIgnoreCase(courseName))
+	        	{  
+	        	 status=true;
+	        	 break;
+	        	}
+	        }
+         if(status==false) {
+        	 count++;
+        	 System.out.println("Invalid course name please enter courses form available courses");
+         }
+         }while(! status && count==2) ;
+
+         while(! status && count>2)
+         {
+        	 break;
+         }
+
+         if(count<2)
+         {
+         System.out.println("\t ENTER COURSE FEES :");
+         int  fees=sc.nextInt();
+         System.out.println("\t ENTER DURATION OF COURSE :");
+         int duration=sc.nextInt();
+         System.out.println("Course successfully launched ...");
+
+		CourseName[] course=CourseName.values();
+		Boolean status1=false;
+		int count1=0;
+
+	    try
+	    {	 	  
+
+		        	String query="Select max(courseid) from course";
+		        	smt=conn.createStatement();
+					ResultSet rs=smt.executeQuery(query);
+					if(!rs.next()) {
+					count1=1;	
+					}
+					else {
+
+					count1=rs.getInt(1);
+					++count1;
+					}
+
+		        	String sql1="insert into course values('"+count+"','"+courseName+"','"+fees+"','"+duration+"')";
+		        	smt=conn.createStatement();
+		  		    int rs1=smt.executeUpdate(sql1);
+		  		    System.out.println("INSERTED");
+		  		    System.out.println("Course Id for lsunched course is :"+count);
+	    }
+	  catch(SQLException e)
+	  {
+		  e.getMessage();
+	   }
+
+    }	
+ }
+
+	public ArrayList<Course> fetchAllCourseDetails()
+	{
+		ArrayList<Course> list=new ArrayList();
+
+		try
+		{
+			CourseName[] cname=CourseName.values();
+    		String sql2="select * from course";
+	    	smt=conn.createStatement();
+	        ResultSet rs=smt.executeQuery(sql2);
+	        while(rs.next())
+		   {
+
+	    	     Course objcourse=new Course();
+	    	     objcourse.setCourseId(rs.getInt(1));
+	    	     String name=rs.getString(2);
+	    	     for(CourseName c: cname)
+	    	     {
+	    	    	 if(c.toString().equalsIgnoreCase(name))
+	    	    	 {
+	    	    		objcourse.setCourseName(c);
+	    	    	 }
+		         }
+	    	 objcourse.setFees(rs.getInt(3));
+	    	 objcourse.setDuration(rs.getInt(4));
+	    	 list.add(objcourse);
+		    }
+		 }
+		catch(SQLException e)
+		{
+			e.getMessage();
+		}
+		return list;
+	}
+
+	public Course fetchCourseDetails(int courseId)
+	{
+		Course objcourse=new Course();
+		CourseIdValidator cv=new CourseIdValidator();
+		Boolean flag=cv.validate(courseId);
+		if(flag)
+		{
+
+           try
+           {
+        	   CourseName[] cname=CourseName.values();
+        	   String sql="SELECT * from course where courseid='"+courseId+"'";
+        	   smt=conn.createStatement();
+   	           ResultSet rs=smt.executeQuery(sql);
+   	           while(rs.next())
+ 		       {
+ 	    	    objcourse.setCourseId(rs.getInt(1));
+ 	    	     String name=rs.getString(2);
+ 	    	     for(CourseName c: cname )
+ 	    	     {
+ 	    	    	 if(c.toString().equalsIgnoreCase(name))
+ 	    	    	 {
+ 	    	    		objcourse.setCourseName(c);
+ 	    	    	 }
+ 		         }
+ 	    	    objcourse.setFees(rs.getInt(3));
+ 	    	    objcourse.setDuration(rs.getInt(4));
+ 		    }
+           }
+           catch(SQLException e)
+           {
+        	   e.getMessage();
+           }
+		}else
+		{
+			System.out.println("Course Id not Valid");
+		}  
+
+	return objcourse;
+	}
+
+	public ArrayList<Student> fetchStudentDetails(int courseId)
+	{
+         ArrayList<Student> list=new ArrayList();
+
+		try
+		{
+			CourseIdValidator cv=new CourseIdValidator();
+	        Boolean flag=cv.validate(courseId);
+	       if(flag)
+	       {
+    		String sql2="SELECT * from student1 where courseid="+courseId;
+	    	smt=conn.createStatement();
+	        ResultSet rs=smt.executeQuery(sql2);
+	        System.out.println("QUERY EXECUTED !");
+	        while(rs.next())
+		   {
+	    	 Student objstudent=new Student();
+	    	 objstudent.setRegId(rs.getInt(1));
+	    	 objstudent.setStudentName(rs.getString(2));
+	    	 objstudent.setAddress(rs.getString(3));
+	    	 objstudent.setContactNumber(rs.getLong(4));
+	    	 objstudent.setCourseId(rs.getInt(5));
+	    	 objstudent.setFeesPaid(rs.getInt(6));
+	    	 String doa=rs.getString(7);
+	    	 SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			dateOfAdmission=df.parse(doa);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+
+	    	 objstudent.setDateOfAdmission(dateOfAdmission);
+	    	 String sdate=rs.getString(8);
+	    	 SimpleDateFormat df1 = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			startDate=df1.parse(sdate);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	    	 objstudent.setStartDate(startDate);
+	    	 String edate=rs.getString(9);
+	    	 SimpleDateFormat df2 = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			endDate=df1.parse(edate);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	    	  objstudent.setEndDate(endDate);
+
+	    	 list.add(objstudent);
+	    	 System.out.println("added");
+		    }
+		 }
+	       else
+	       {
+	    	   System.out.println("Enter Valid course Id !");
+	       }
+		}
+		catch(SQLException e)
+		{
+			e.getMessage();
+		}
+		return list;
+     	}
+
+	}
+
+ 218  StudentDetails.java 
+@@ -0,0 +1,218 @@
+package com.student;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
+import java.util.Scanner;
+
+
+public class StudentDetails {
+	public static void main(String[] args) {
+		 int regId;
+		 String studentName;
+		 String address;
+	     long contactNumber;
+	     int courseId;
+	     int feesPaid;
+	     Date dateOfAdmission=null;
+	     Date startDate=null;
+	     String sdate;
+	     String edate;
+	     Date endDate=null;
+	     String courseName;
+	     int duration;
+	     int fees;
+	     ArrayList<Course> arlist=new ArrayList();
+	     ArrayList<Student>arlist1=new ArrayList();
+	     Scanner sc=new Scanner(System.in);
+		 int option;
+
+     	do
+	   {
+		System.out.println("\t \t \t STUDENT DATA MANAGEMENT SYSTEM  ");
+		System.out.println("\t \t \t  ***MENU****");
+	    System.out.println("\t \t \t1. LAUNCH NEW COURSE");
+	    System.out.println("\t \t \t2. ENROLL STUDENT");
+	    System.out.println("\t \t \t3. VIEW STUDENT DETAILS");
+	    System.out.println("\t \t \t4. VIEW COURSE DETAILS");
+	    System.out.println("\t \t \t5. EXIT");
+
+	    Student objstudent =new Student();
+	    StudentManager objmanager=new StudentManager();
+	    StudentCourseService objcourseservice=new StudentCourseService();
+	    Course objcourse=new Course();
+
+	     option=sc.nextInt(); 
+	     switch(option)
+	     {
+	     case 1:	  
+				 objcourseservice.launchCourse();	  
+
+	             break;
+
+	     case 2:
+	            System.out.println("\t*** ENTER DETAILS OF STUDENT***");
+
+	            System.out.println("\t ENTER NAME OF THE STUDENT :");
+	            studentName=sc.next();
+	            System.out.println("\t ENTER ADDRESS OF THE STUDENT :");
+	            address=sc.next();
+	            System.out.println("\t ENTER CONTACT NUMBER :");
+	            contactNumber=sc.nextLong();
+	            System.out.println("\t ENTER COURSE ID :");
+	            courseId=sc.nextInt();
+	            System.out.println("\t ENTER FEES PAID :");
+	            feesPaid=sc.nextInt();
+
+	            System.out.println("\t DATE OF ADMISSION IS :");
+	            SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
+	   		    dateOfAdmission=new Date();
+	   		    System.out.println(df.format(dateOfAdmission));
+	            System.out.println("\t ENTER START DATE :");
+	            sdate=sc.next();
+	            System.out.println("\t ENTER END DATE:");
+	            edate=sc.next();
+	            SimpleDateFormat df1 = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			startDate=df1.parse(sdate);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	    		SimpleDateFormat df2 = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			endDate=df2.parse(edate);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	    		 if(dateOfAdmission.after(startDate)||startDate.before(dateOfAdmission))
+	    		 {
+	    			 System.out.println("Enter proper start date !!");
+
+	    		 }
+	    		 else
+	    		 {
+	    			 if(startDate.after(endDate)||endDate.before(startDate)) {	
+		    			 System.out.println("Enter proper dates !!");
+	    			 }
+		    			 else
+		    			 {
+		    				 objmanager.EnrollStudent(studentName,address,contactNumber,courseId,feesPaid,dateOfAdmission,startDate,endDate);
+		    			 }
+	    		 }
+
+                break;
+	     case 4:System.out.println("**SELECT AN OPTION TO VIEW COURSE DETAILS :");
+	            System.out.println("\t \t 1)VIEW ALL COURSE DETAILS \n\t \t 2)VIEW COURSE DETAILS OF A SPECIFIC COURSE");
+	            int op=sc.nextInt();
+	            if(op==1)
+	            {
+	            	arlist=objcourseservice.fetchAllCourseDetails();
+	            	for(int i=0;i<arlist.size();i++)
+	 	       	   {
+
+	 	       		Object obj=arlist.get(i);
+	 	       		if(obj instanceof Course)
+	 	       		  {
+	 	       			System.out.println("COURSE ID       :"+((Course) obj).getCourseId());
+	 	       		    System.out.println("COURSE NAME     :"+((Course)obj).getCourseName());
+	 	       		    System.out.println("COURSE FEES     :"+((Course) obj).getFees()); 
+	 	       			System.out.println("COURSE DURATION :"+((Course) obj).getDuration());
+	 	       		    System.out.println("------------------------");
+	 	       		   }
+	 	       		  else
+	 	       		  System.out.println(obj);
+	 	            	}
+	            }
+	            else
+	            {
+	    	        System.out.println("\nEnter the course Id :");
+		            int id=sc.nextInt();
+		    	    objcourse=objcourseservice.fetchCourseDetails(id);
+		    	    if(objcourse.getCourseId()==0) {
+		    	    	break;
+		    	    }
+		    	    else {
+		    	    System.out.println("COURSE ID       :"+objcourse.getCourseId());
+		    	    System.out.println("COURSE NAME     :"+objcourse.getCourseName());
+		    	    System.out.println("COURSE FEES     :"+objcourse.getFees());
+		    	    System.out.println("COURSE DURATION :"+objcourse.getDuration());
+		    	    System.out.println("------------------------");
+		    	    }
+	            }
+                break;	      
+
+
+	     case 3:System.out.println("\t \t***SELECT AN OPTION TO VIEW STUDENT DETAILS***");
+	            System.out.println("\t \t1)VIEW STUDENT DEATILS BY REG ID \n\t \t2)VIEW STUDENT DETAILS BY COURSE ID");
+	            int op1=sc.nextInt();
+	            if(op1==1)
+	            {
+
+	                    System.out.println("\nEnter the reg Id :");
+			            int id=sc.nextInt();
+			    	    objstudent=objmanager.viewStudentDetail(id); 
+			    	    System.out.println("REG ID           :"+objstudent.getRegId());
+			    	    System.out.println("STUDENT NAME     :"+objstudent.getStudentName());
+			    	    System.out.println("STUDENT ADDRESS  :"+objstudent.getAddress());
+			    	    System.out.println("CONTACT NUMBER   :"+objstudent.getContactNumber());
+			    	    System.out.println("COURSE ID        :"+objstudent.getCourseId());
+			    	    System.out.println("FEES PAID        :"+objstudent.getFeesPaid());
+			    	     DateFormat sf=new SimpleDateFormat("dd-MM-yyyy");
+			    	     Date correctdate1=objstudent.getDateOfAdmission();
+						 String datetodisplay=sf.format(correctdate1);
+						 Date correctsdate2=objstudent.getStartDate();
+						 String sdatetodisplay=sf.format(correctsdate2);
+						 Date correctedate3=objstudent.getEndDate();
+						 String edatetodisplay=sf.format(correctedate3);
+
+			    	    System.out.println("DATE OF ADMISSION:"+datetodisplay);
+			    	    System.out.println("START DATE       :"+sdatetodisplay);
+			    	    System.out.println("END DATE         :"+edatetodisplay); 
+			    	    System.out.println("------------------------");
+	            }
+	            else
+	            {
+	    	        System.out.println("Enter courseId :");
+	                int id1=sc.nextInt();
+	                arlist1=objmanager.viewStudentDetails(id1);
+	                for(int i=0;i<arlist1.size();i++)
+	       	        {
+	       		      Object obj=arlist1.get(i);
+	       		      if(obj instanceof Student)
+	       		      {
+	       			    System.out.println("REG ID           :"+((Student) obj).getRegId());
+	       			    System.out.println("STUDENT NAME     :"+((Student) obj).getStudentName());
+	       			    System.out.println("STUDENT ADDRESS  :"+((Student) obj).getAddress());
+	       			    System.out.println("CONTACT NUMBER   :"+((Student) obj).getContactNumber());
+	       			    System.out.println("COURSE ID        :"+((Student) obj).getCourseId());
+	       			    System.out.println("FEES PAID        :"+((Student) obj).getFeesPaid());
+
+	       			 DateFormat sf1=new SimpleDateFormat("dd-MM-yyyy");
+		    	     Date correctdate11=((Student)obj).getDateOfAdmission();
+		    	     String datetodisplay=sf1.format(correctdate11);
+		    	     System.out.println("DATE OF ADMISSION:"+datetodisplay);
+
+		    	     DateFormat sf2=new SimpleDateFormat("dd-MM-yyyy");
+		    	     Date correctdate12=((Student)obj).getStartDate();
+		    	     String sdatetodisplay=sf2.format(correctdate12);
+		    	     System.out.println("START DATE       :"+sdatetodisplay);
+
+		    	     DateFormat sf3=new SimpleDateFormat("dd-MM-yyyy");
+		    	     Date correctdate13=((Student)obj).getEndDate();
+		    	     String edatetodisplay=sf3.format(correctdate13);
+		    	     System.out.println("END DATE         :"+edatetodisplay);
+		    	     System.out.println("------------------------");
+	       		   }
+	       		  else
+	       		  System.out.println(obj);
+	            	}
+	            }
+	           break;
+	     case 5:break;  
+	    }
+
+	} while(option!=5);  		
+  }
+}
+ 142  StudentManager.java 
+@@ -0,0 +1,142 @@
+package com.student;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+public class StudentManager {
+	    Date dateOfAdmission;
+	    Date startDate;
+	    Date endDate;
+
+	public void EnrollStudent(String studentName,String address,Long contactNumber,int courseId,int feesPaid,Date dateOfAdmission,Date startDate,Date endDate)
+	{
+		DbConnect db=new DbConnect();
+	    Connection con=null;
+	    con=db.connect();
+	    int count=0;
+	    try {
+	    	 CourseIdValidator cv=new CourseIdValidator();
+	    	 Boolean status=cv.validate(courseId);
+	    	if(status)
+	    	{ 
+
+	    	    String queryforcount="Select max(regid) from student1";
+	    		Statement smt=con.createStatement();
+				ResultSet rs1=smt.executeQuery(queryforcount);
+				if(!rs1.next()) {
+				count=1;	
+				}
+				else {
+
+				count=rs1.getInt(1);
+				++count;
+				}
+
+
+
+	          SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
+	          String doa=df.format(dateOfAdmission);
+	          String sdate=df.format(startDate);
+			  String edate=df.format(endDate);
+
+	          String insertquery="INSERT INTO student1 VALUES (" +count+ ",'" +studentName+ "','" +address+ "'," +contactNumber+ ","+courseId+","+feesPaid+ ",'"+doa+ "','"+sdate+ "','"+edate+"')";
+	          Statement st1=con.createStatement();
+	          int rows=st1.executeUpdate(insertquery);
+	          if(rows>0) {
+		       System.out.println("INSERTION SUCCESS");
+	        }
+          }
+	    	else
+	    	{
+	    		System.out.println("Course Id is not Valid !");
+	    	}
+	    }
+           catch(SQLException e) {
+	      e.printStackTrace();
+          }	
+
+	}
+	public ArrayList<Student> viewStudentDetails(int courseId)
+	{
+		ArrayList<Student> list=new ArrayList();
+
+			CourseIdValidator cv=new CourseIdValidator();
+	        Boolean flag=cv.validate(courseId);
+	       if(flag)
+	       {
+		      StudentCourseService scs=new StudentCourseService();
+		      list=scs.fetchStudentDetails(courseId);
+	       } 
+
+	       else
+	       {
+	    	   System.out.println("Enter Valid course Id !");
+	       } 
+		return list;
+
+	}
+
+	public Student viewStudentDetail(int regId)
+	{
+
+		DbConnect db=new DbConnect();
+	    Connection conn=null;
+	    Student objstudent=new Student();
+		try
+		{
+			conn=db.connect();
+    		String sql2="SELECT * from student1 where regid='"+regId+"'";
+    		Statement smt=conn.createStatement();
+	        ResultSet rs=smt.executeQuery(sql2);
+	        while(rs.next())
+		   {
+
+	    	 objstudent.setRegId(rs.getInt(1));
+	    	 objstudent.setStudentName(rs.getString(2));
+	    	 objstudent.setAddress(rs.getString(3));
+	    	 objstudent.setContactNumber(rs.getLong(4));
+	    	 objstudent.setCourseId(rs.getInt(5));
+	    	 objstudent.setFeesPaid(rs.getInt(6));
+	    	 String doa=rs.getString(7);
+	    	 SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			dateOfAdmission=df.parse(doa);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	    	 objstudent.setDateOfAdmission(dateOfAdmission);
+	    	 String sdate=rs.getString(8);
+	    	 SimpleDateFormat df1 = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			startDate=df1.parse(sdate);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	    	 objstudent.setStartDate(startDate);
+	    	 String edate=rs.getString(9);
+	    	 SimpleDateFormat df2 = new SimpleDateFormat("dd-MM-yyyy");
+	    		try {
+	    			endDate=df1.parse(edate);
+	    		} catch (java.text.ParseException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	    	 objstudent.setEndDate(endDate);
+
+	       }
+		}catch(SQLException e)
+		  {
+			  e.getMessage();
+		  }
+		return objstudent;
+	}
+}
+
